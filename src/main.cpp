@@ -1,12 +1,4 @@
 #include "parser.h"
-#include <algorithm>
-#include <cctype>
-#include <cstdio>
-#include <cstdlib>
-#include <map>
-#include <memory>
-#include <string>
-#include <vector>
 
 using namespace llvm;
 
