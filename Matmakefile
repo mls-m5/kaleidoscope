@@ -1,0 +1,20 @@
+
+# using matmake2: https://github.com/laserskold/matmake2
+
+main
+  out = main
+  src =
+    src/*.cpp
+  flags = `llvm-config-11 --cxxflags --ldflags --system-libs --libs core` 
+  eflags = `llvm-config-11 --cxxflags` 
+  command = [exe]
+
+all
+  in = @main
+  config =
+    c++17
+    Wall
+    Wextra
+  includes =
+    include
+
