@@ -1,9 +1,14 @@
 #include "parser.h"
 
 #include "debuginfo.h"
-#include "llvm/IR/DIBuilder.h"
-#include "llvm/Support/Host.h"
-#include "llvm/Support/TargetSelect.h"
+#include <llvm/IR/DIBuilder.h>
+#include <llvm/IR/LegacyPassManager.h>
+#include <llvm/Support/FileSystem.h>
+#include <llvm/Support/Host.h>
+#include <llvm/Support/TargetRegistry.h>
+#include <llvm/Support/TargetSelect.h>
+#include <llvm/Target/TargetMachine.h>
+#include <llvm/Target/TargetOptions.h>
 
 using namespace llvm;
 
@@ -80,6 +85,8 @@ static void MainLoop() {
 //===----------------------------------------------------------------------===//
 int main() {
     InitializeNativeTarget();
+    InitializeAllTargetInfos();
+    InitializeAllTargetMCs();
     InitializeNativeTargetAsmPrinter();
     InitializeNativeTargetAsmParser();
 
@@ -128,6 +135,51 @@ int main() {
 
     // Print out all of the generated code.
     TheModule->print(errs(), nullptr);
+
+    { // output .o file From part 8
+
+        std::string error;
+
+        auto targetTripple =
+            sys::getDefaultTargetTriple(); // What architecture to compile for
+
+        auto target = TargetRegistry::lookupTarget(targetTripple, error);
+
+        // Print an error and exit if we couldn't find the requested target.
+        // This generally occurs if we've forgotten to initialise the
+        // TargetRegistry or we have a bogus target triple.
+        if (!target) {
+            errs() << error;
+            return 1;
+        }
+
+        auto CPU = "generic";
+        auto Features = "";
+        TargetOptions opt;
+        auto RM = Optional<Reloc::Model>{};
+        auto TargetMachine =
+            target->createTargetMachine(targetTripple, CPU, Features, opt, RM);
+
+        // Not required but could add some performance apparently
+        module->setDataLayout(TargetMachine->createDataLayout());
+        module->setTargetTriple(targetTripple);
+
+        auto filename = "output.o";
+        std::error_code ec;
+
+        raw_fd_ostream dest(filename, ec, sys::fs::OF_None);
+
+        auto pass = legacy::PassManager{};
+        auto fileType = CGFT_ObjectFile;
+
+        if (TargetMachine->addPassesToEmitFile(pass, dest, nullptr, fileType)) {
+            errs() << "TargetMachine cant emit a file of this type";
+            return 1;
+        }
+
+        pass.run(*module);
+        dest.flush();
+    }
 
     return 0;
 }

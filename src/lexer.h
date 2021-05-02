@@ -1,6 +1,6 @@
 #pragma once
 
-#include "llvm/IR/DIBuilder.h"
+#include <llvm/IR/DIBuilder.h>
 #include <string>
 
 /// The lexer returns tokens[0 - 255] if it is an unknown character, otherwise

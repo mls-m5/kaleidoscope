@@ -1,11 +1,11 @@
 #pragma once
 
 #include "lexer.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/IR/Function.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IR/Value.h"
-#include "llvm/Support/raw_ostream.h"
+#include <llvm/ADT/STLExtras.h>
+#include <llvm/IR/Function.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/Value.h>
+#include <llvm/Support/raw_ostream.h>
 
 /// Initialize the global module and return a pointer to it
 llvm::Module *InitializeModule();

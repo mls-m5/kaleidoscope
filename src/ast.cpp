@@ -3,8 +3,11 @@
 #include "errors.h"
 #include "globals.h"
 #include "parser.h"
-#include "llvm/IR/IRBuilder.h"
-#include "llvm/IR/Verifier.h"
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/Verifier.h>
+#include <llvm/Transforms/InstCombine/InstCombine.h>
+#include <llvm/Transforms/Scalar.h>
+#include <llvm/Transforms/Scalar/GVN.h>
 
 using namespace llvm;
 
@@ -15,6 +18,16 @@ Module *InitializeModule() {
 
     // Create a new builder for the module.
     Builder = std::make_unique<IRBuilder<>>(*TheContext);
+
+    // Some optimiziations
+    functionPassManager =
+        std::make_unique<legacy::FunctionPassManager>(TheModule.get());
+
+    functionPassManager->add(createInstructionCombiningPass());
+    functionPassManager->add(createReassociatePass());
+    functionPassManager->add(createGVNPass());
+    functionPassManager->add(createCFGSimplificationPass());
+    functionPassManager->doInitialization();
 
     return TheModule.get();
 }
