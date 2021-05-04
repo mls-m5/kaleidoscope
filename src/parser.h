@@ -15,6 +15,9 @@ static int getNextToken() {
     return CurTok = gettok();
 }
 
+/// top ::= definition | external | expression | ';'
+static void MainLoop();
+
 /// BinopPrecedence - This holds the precedence for each binary operator that is
 /// defined.
 static std::map<char, int> BinopPrecedence;
